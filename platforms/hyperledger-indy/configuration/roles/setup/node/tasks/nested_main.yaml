@@ -1,6 +1,5 @@
 # This deploys all nodes sequencially per organization
 ---
-
 #----------------------------------------------------------------------
 # create deployment file for node steward
 - name: "Create steward deployment file"
@@ -11,10 +10,6 @@
     component_name: "{{ organization }}-{{ stewardItem.name }}-node"
     indy_version: "indy-{{ network.version }}"
     release_dir: "{{ playbook_dir }}/../../../{{ gitops.release_dir }}"
-  # loop: "{{ services.stewards }}"
-  # when: services.stewards is defined
-  # loop_control:
-  #   loop_var: stewardItem
 
 # ---------------------------------------------------------------------
 # push the created deployment files to repository
@@ -30,10 +25,6 @@
     GIT_BRANCH: "{{ gitops.branch }}"
     GIT_RESET_PATH: "platforms/hyperledger-indy/configuration"
     msg: "[ci skip] Pushing deployment files for {{ organization }}-{{ stewardItem.name }}-node"
-  # loop: "{{ services.stewards }}"
-  # when: services.stewards is defined
-  # loop_control:
-  #   loop_var: stewardItem
 
 # ---------------------------------------------------------------------
 # wait until steward pods are running
@@ -46,7 +37,3 @@
     component_name: "{{ organization }}-{{ stewardItem.name }}-node"
     label_selectors:
       - app = {{ component_name }}
-  # loop: "{{ services.stewards }}"
-  # when: services.stewards is defined
-  # loop_control:
-  #   loop_var: stewardItem
