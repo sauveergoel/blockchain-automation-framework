@@ -1,0 +1,31 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: employer-employer-trustee
+  annotations:
+    fluxcd.io/automated: "false"
+  namespace: employer-ns
+spec:
+  releaseName: employer-employer-trustee
+  chart:
+    path: platforms/hyperledger-indy/charts/indy-key-mgmt
+    git: ssh://git@github.com/sauveergoel/blockchain-automation-framework.git
+    ref: indy_bug
+  values:
+    metadata:
+      name: employer-employer-trustee
+      namespace: employer-ns
+    network:
+      name: baf
+    image:
+      name: employer
+      repository: index.docker.io/hyperledgerlabs/indy-key-mgmt:1.11.0
+      pullSecret: regcred
+    vault:
+      address: http://ab0e697583dfc447b8d14e6526e14759-1481581572.eu-west-1.elb.amazonaws.com:20002
+      keyPath: employer.trustees
+      identity: employer-trustee
+      auth_path: kubernetes-employer-admin-auth
+    account:
+      service: employer-admin-vault-auth
+      role: rw
