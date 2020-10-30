@@ -1,0 +1,31 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: authority-authority-trustee
+  annotations:
+    fluxcd.io/automated: "false"
+  namespace: authority-ns
+spec:
+  releaseName: authority-authority-trustee
+  chart:
+    path: platforms/hyperledger-indy/charts/indy-key-mgmt
+    git: ssh://git@github.com/sauveergoel/blockchain-automation-framework.git
+    ref: indy_bug
+  values:
+    metadata:
+      name: authority-authority-trustee
+      namespace: authority-ns
+    network:
+      name: baf
+    image:
+      name: authority
+      repository: index.docker.io/hyperledgerlabs/indy-key-mgmt:1.11.0
+      pullSecret: regcred
+    vault:
+      address: http://ab0e697583dfc447b8d14e6526e14759-1481581572.eu-west-1.elb.amazonaws.com:20002
+      keyPath: authority.trustees
+      identity: authority-trustee
+      auth_path: kubernetes-authority-admin-auth
+    account:
+      service: authority-admin-vault-auth
+      role: rw
