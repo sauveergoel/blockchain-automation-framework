@@ -19,6 +19,9 @@ spec:
       name: {{ network.name }}
     organization:
       name: {{ organizationItem.name }}
+    genesis:
+      pool: {{ genesis.pool | indent(width=8) | b64encode }}
+      domain: {{ genesis.domain | indent(width=8) | b64encode }}
     image:
       pullSecret: regcred
       initContainer:
@@ -29,10 +32,10 @@ spec:
         repository: {{ network.docker.url }}/indy-node:{{ network.version }}
     node:
       name: {{ stewardItem.name }}
-      ip: 0.0.0.0
+      ip: 127.0.0.1
       port: {{ stewardItem.node.port }}
     client:
-      ip: 0.0.0.0
+      ip: 127.0.0.1
       port: {{ stewardItem.client.port }}
     service:
 {% if organizationItem.cloud_provider != 'minikube' %}
