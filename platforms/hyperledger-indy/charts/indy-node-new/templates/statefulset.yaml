@@ -159,7 +159,6 @@ spec:
         volumeMounts:
         - name: ebs-indy-node-keys
           mountPath: /keys
-
       - name: "{{ $.Values.image.cli.name }}"
         image: "{{ $.Values.image.cli.repository }}"
         stdin: true
@@ -269,7 +268,7 @@ spec:
             KEY_PATH=/var/lib/indy/keys/${INDY_NETWORK_NAME}/keys/${INDY_NODE_NAME};
 
             echo ${POOL_GENESIS} | base64 -d | sed -e 's/[ \t]*//' > /var/lib/indy/genesis/${INDY_NETWORK_NAME}/pool_transactions_genesis;
-            echo ${DOMAIN_GENESIS} | base64 -d | sed -e 's/[ \t]*//' > /var/lib/indy/genesis/${INDY_NETWORK_NAME}/domain_transactions_genesis;       
+            echo ${DOMAIN_GENESIS} | base64 -d | sed -e 's/[ \t]*//' > /var/lib/indy/genesis/${INDY_NETWORK_NAME}/domain_transactions_genesis;
 
             chmod +x /var/lib/indy/start-indy-node.sh;
             /var/lib/indy/start-indy-node.sh;
