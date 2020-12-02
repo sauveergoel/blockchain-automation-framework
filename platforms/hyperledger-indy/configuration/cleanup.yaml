@@ -33,6 +33,7 @@
     loop: "{{ network['organizations'] }}"
     loop_control:
       loop_var: organizationItem
+    when: network.genesis.type is not defined
 
   # Cleanup Flux release folder in Git for all organizations
   - name: Delete release folder

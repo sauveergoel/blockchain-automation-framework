@@ -132,13 +132,29 @@
   - name: 'Create domain genesis'
     include_role:
       name: setup/domain_genesis
-    when: network['type'] == 'indy'
+    when: network['type'] == 'indy' and network.genesis.type is not defined
 
   # Create and deploy pool genesis
   - name: 'Create pool genesis'
     include_role:
       name: setup/pool_genesis
-    when: network['type'] == 'indy'
+    when: network['type'] == 'indy' and network.genesis.type is not defined
+
+  # Transfer DID and Seed Values between Vaults
+  - name: "Transfer DID and Seed Values between Vaults"
+    include_role:
+      name: setup/add_did_vault
+    vars:
+      organization: "{{ organizationItem.name | lower }}"
+      component_ns: "{{ organizationItem.name | lower }}-ns"
+      component_name: "{{ organization }}"
+      services: "{{ organizationItem.services }}"
+      vault: "{{ organizationItem.vault }}"
+      genesis: "{{ network.genesis }}"
+    loop: "{{ network['organizations'] }}"
+    loop_control:
+      loop_var: organizationItem
+    when: network['type'] == 'indy' and organizationItem.type == 'peer' and network.genesis.type is defined and network.genesis.type == 'add-org'
 
   # Deploy all other nodes
   - name: 'Deploy nodes'
@@ -151,6 +167,7 @@
       kubernetes: "{{ organizationItem.k8s }}"
       vault: "{{ organizationItem.vault }}"
       gitops: "{{ organizationItem.gitops }}"
+      genesis: "{{ network.genesis }}"
     loop: "{{ network['organizations'] }}"
     loop_control:
       loop_var: organizationItem
@@ -166,6 +183,7 @@
       kubernetes: "{{ organizationItem.k8s }}"
       gitops: "{{ organizationItem.gitops }}"
       vault: "{{ organizationItem.vault }}"
+      genesis: "{{ network.genesis }}"
     loop: "{{ network['organizations'] }}"
     loop_control:
       loop_var: organizationItem

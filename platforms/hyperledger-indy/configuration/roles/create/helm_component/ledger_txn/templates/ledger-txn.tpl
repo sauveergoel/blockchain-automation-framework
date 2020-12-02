@@ -17,6 +17,9 @@ spec:
       namespace: {{ component_ns }}
     network:
       name: {{ network.name }}
+    genesis:
+      pool: {{ genesis.pool | indent(width=8) | b64encode }}
+      domain: {{ genesis.domain | indent(width=8) | b64encode }}
     image:
       cli:
         name: {{ component_name }}

@@ -21,6 +21,19 @@
   vars:
     values_file: "{{ release_dir }}/{{ organization }}/{{ component_name }}/{{ component_type }}.yaml"
     chart: "indy-node"
+  when: network.genesis.type is not defined 
+
+
+##############################################################################################
+# This task creates deployment file for stewards of the new added org in an existing network.
+- name: "create value file for {{ component_name }} {{ component_type }}"
+  template:
+    src: "{{ dlt_templates[component_type] }}"
+    dest: "{{ values_file }}"
+  vars:
+    values_file: "{{ release_dir }}/{{ organization }}/{{ component_name }}/{{ component_type }}.yaml"
+    chart: "indy-node-new"
+  when: network.genesis.type is defined and network.genesis.type == 'add-org'
 
 ################################################################################################
 # This task tests the value file for syntax errors/ missing values

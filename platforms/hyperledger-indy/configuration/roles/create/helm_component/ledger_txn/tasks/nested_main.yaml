@@ -45,6 +45,19 @@
     chart: "indy-ledger-txn"
     identity_name: "{{ identity_name }}"
     vault_role: "rw"
+  when: network.genesis.type is not defined 
+
+# This task creates deployment file for new identities for new added org in an existing network.
+- name: "create value file for {{ new_component_name }} {{ component_type }}"
+  template:
+    src: "{{ dlt_templates[component_type] }}"
+    dest: "{{ values_file }}"
+  vars:
+    values_file: "{{ release_dir }}/{{ component_type }}/{{ identity_name }}-{{ component_type }}.yaml"
+    chart: "indy-ledger-txn-new-node"
+    identity_name: "{{ identity_name }}"
+    vault_role: "rw"
+  when: network.genesis.type is defined and network.genesis.type == 'add-org' 
 
 - name: "Delete file"
   shell: |
