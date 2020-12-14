@@ -146,7 +146,6 @@ spec:
           - -c
         args:
           - |
-            tail -f /dev/null;
             echo -n {{ .Values.staticnodes | toJson | quote }} > /opt/besu/static-nodes.json
             mkdir -p $BESU_GENESIS_DIR;
             cat {{ .Values.node.mountPath }}/genesis/genesis.json.base64 | base64 -d > $BESU_GENESIS_DIR/genesis.json
@@ -159,7 +158,7 @@ spec:
             --identity={{ .Values.node.name }} \
             --discovery-enabled=false \
             --node-private-key-file=/secrets/nodekey \
-            --genesis-file=/etc/genesis/genesis.json \
+            --genesis-file=$BESU_GENESIS_DIR/genesis.json \
             --logging=DEBUG \
             --nat-method=MANUAL \
             --tx-pool-retention-hours=999 \

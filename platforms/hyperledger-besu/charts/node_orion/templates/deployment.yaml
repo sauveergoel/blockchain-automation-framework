@@ -223,7 +223,7 @@ spec:
             --identity={{ .Values.node.name }} \
             --discovery-enabled=false \
             --node-private-key-file=/secrets/nodekey \
-            --genesis-file=/etc/genesis/genesis.json \
+            --genesis-file=$BESU_GENESIS_DIR/genesis.json \
             --logging=DEBUG \
             --nat-method=MANUAL \
             --tx-pool-retention-hours=999 \
