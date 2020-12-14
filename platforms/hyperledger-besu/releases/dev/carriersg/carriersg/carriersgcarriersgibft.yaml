@@ -1,0 +1,87 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: carriersgcarriersgibft
+  namespace: carriersg-bes
+  annotations:
+    flux.weave.works/automated: "false"
+spec:
+  releaseName: carriersgcarriersgibft
+  chart:
+    git: ssh://git@github.com/sauveergoel/blockchain-automation-framework.git
+    ref: besuupgrade
+    path: platforms/hyperledger-besu/charts/node_orion 
+  values:
+    replicaCount: 1
+
+    healthcheck:
+      readinessthreshold: 100
+      readinesscheckinterval: 5
+
+    staticnodes:
+      - "enode://9073e10f430d9014e0426d38adf457ad90cc36a5a1fad7498b33955695c922ce3c23eeb87d1e94e67330d10e5029c1fd4ae9e95628709273ba64ee031dfb06f3@54.73.71.70:15050"
+      - "enode://879e79fc1a8aeeb14707804207c64cb270d74376e860642e2ccab4b7166c07dc354b5ae04de46f8e2430234c2e609d839edb9615efc89bd3c5782929029b3e37@54.73.71.70:15060"
+      - "enode://efc35c369c85b376b64a53525a3827a8ad5b945daa85584cca772e15922110e3443780f7f5a8befe0f52974cc2fa21ad0e1cd4d643c543bcbd54826b701d00fc@54.73.71.70:15070"
+      - "enode://0766b108718b728fb4401e12e63dbd26badc039d934381b90bd0d18b642ef5b6650a1c0ae269439275c982dbbd0c41d581cdd6c03c2f0ba01d3e183cb47681ed@54.73.71.70:15080"
+      - "enode://5f12261346bdbc4e56a76fbe600bf7f85b9021adee1a0f147d879b44c9ae555795a15dbbdeb845418c32255a7cbd22f0be162ff8f7e0088d89522f8eab65dfd1@54.73.71.70:15010"
+      - "enode://f666ec73a7508b817f196979c3771037c0d536a29c879e8b2fe0daf28eada923ffddaf6f5d35ef42aa370ab3477d6560ac107ef23727e1a20d2ee2a9421a70a6@54.73.71.70:15020"
+      - "enode://8c85f197ad0306fc59f54467c9bc2326a2c3daf0f7bf9f0e18e670d289a0c317e77b99e08ac1e65a66a6c0a42ac6ee332cece68ff4310a88997864705c96c468@54.73.71.70:15030"
+      - "enode://9413b77b054140e8b7b4e2b0b6e85dbb0dbca5919fc8b02a3e848b78611569126572a3bcd5604703aa2ecbf47c1b5745afef3cd2e10931fc90f637e03c64f0c6@54.73.71.70:15040"
+
+    metadata:
+      namespace: carriersg-bes
+      labels:
+
+    liveliness_check:
+      enabled: false
+
+    proxy:
+      provider: ambassador
+      external_url: carriersg.besu.devh3.aws.blockchaincloudpoc-develop.com
+      p2p: 15010
+      rpc: 15011
+      tmport: 15013
+
+    images:
+      node: hyperledger/besu:1.5.3
+      alpineutils: hyperledgerlabs/alpine-utils:1.0
+      orion: pegasyseng/orion:1.5.2
+
+    node:
+      name: carriersg
+      consensus: ibft
+      subject: O=Carrier,OU=Carrier,L=London,C=GB
+      mountPath: /etc/genesis
+      servicetype: ClusterIP
+      imagePullSecret: regcred
+      ports:
+        p2p: 30303
+        rpc: 8545
+        ws: 8546
+
+    orion:
+      name: orion
+      tls: True
+      confdir: /etc/config
+      url: "https://carriersg.besu.devh3.aws.blockchaincloudpoc-develop.com"
+      nodelist: "\"https://manufacturersg.besu.devh3.aws.blockchaincloudpoc-develop.com:15023\",\"https://storesg.besu.devh3.aws.blockchaincloudpoc-develop.com:15033\",\"https://warehousesg.besu.devh3.aws.blockchaincloudpoc-develop.com:15043\""
+      trust: ca-or-tofu
+      ports:
+        nodeport: 8888
+        clientport: 8080
+
+    storage:
+      storageclassname: awsstorageclass
+      storagesize: 1Gi
+
+    vault:
+      address: http://ab0e697583dfc447b8d14e6526e14759-1481581572.eu-west-1.elb.amazonaws.com:20002
+      secretprefix: secret/carriersg-bes/crypto/carriersg
+      serviceaccountname: vault-auth
+      keyname: data
+      oriondir: orion
+      tlsdir: tls
+      role: vault-role
+      authpath: besucarriersg
+
+    genesis: ewogICJjb25maWciOiB7CiAgICAiY2hhaW5JZCI6IDIwMTgsCiAgICAiY29uc3RhbnRpbm9wbGVmaXhibG9jayI6IDAsCiAgICAiY29udHJhY3RTaXplTGltaXQiOiAyMTQ3NDgzNjQ3LAogICAgImliZnQyIjogewogICAgICAiYmxvY2twZXJpb2RzZWNvbmRzIjogMiwKICAgICAgImVwb2NobGVuZ3RoIjogMzAwMDAsCiAgICAgICJyZXF1ZXN0dGltZW91dHNlY29uZHMiOiAxMAogICAgfQogIH0sCiAgIm5vbmNlIjogIjB4MCIsCiAgInRpbWVzdGFtcCI6ICIweDU4ZWU0MGJhIiwKICAiZ2FzTGltaXQiOiAiMHgxZmZmZmZmZmZmZmZmZiIsCiAgImRpZmZpY3VsdHkiOiAiMHgxIiwKICAiZXh0cmFEYXRhIjogIjB4Zjg3ZWEwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMGY4NTQ5NGUzZmNjN2I2ZTliMjhmMTliZjNjODc0YmZmNzlhYWJiNjEyYmJkMDk5NGU5ZTI1OGYyMjcyMWFiZDgwNDhmZDRiMDQxY2FhNmQ3YjNhZmU4ZjI5NGVhYWE4MGU0MjRlYzA2Y2Q4ZjZkZjZkNzViY2NiZWMxZGQzOTJhNzU5NDYxNGMxMGI1ZDVmMzg4MTEyYmRlYWRhMDg1ZmI0YWUxNjNlMWQyZTQ4MDg0MDAwMDAwMDBjMCIKfQ==
