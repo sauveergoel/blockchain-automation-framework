@@ -1,0 +1,87 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: warehousesgwarehousesgibft
+  namespace: warehousesg-bes
+  annotations:
+    flux.weave.works/automated: "false"
+spec:
+  releaseName: warehousesgwarehousesgibft
+  chart:
+    git: ssh://git@github.com/sauveergoel/blockchain-automation-framework.git
+    ref: besuupgrade
+    path: platforms/hyperledger-besu/charts/node_orion 
+  values:
+    replicaCount: 1
+
+    healthcheck:
+      readinessthreshold: 100
+      readinesscheckinterval: 5
+
+    staticnodes:
+      - "enode://14919211967686c7a387823a738e5656f82434664c781086dcc59a4aaa5678cac72cf874c62f6d3aa320c82ba4b7b5be0184d7a1b615e446eac0a7da213726b0@54.73.71.70:15050"
+      - "enode://7e0a6b0b0642efad74deb8b398ffb6ba4fd93ed680967c38784bee0135c31f4741f3a1ab7c52727bfa1e4744577be7926a5bb16dd5290effb0bb5483ebacf60a@54.73.71.70:15060"
+      - "enode://743cf288128db05c4b8dec4469b21acec703840878dcfcf334540b9b0025cbff255f64050a8cb23ed337021563a71e44fc49fe999e93100e45c422462428319b@54.73.71.70:15070"
+      - "enode://293f1504f51ad7d3fa33acc6dc5446c3a5c9a63e5cf557686f06986d1a80cd91c562a02fac2adfaa7e1a7ce7950c36c3fd55f374addff68fd7f8cf0e8ae42ff4@54.73.71.70:15080"
+      - "enode://f1d197937bc738bd469cbb4cf3b36dc43604de8215c6f844a5af7adca4b0b49334d97326ec5b8d766de74c34cc3124b670d764763c6377bdc4d2b3dda7d5b2a9@54.73.71.70:15010"
+      - "enode://52b2367e5a294ac8640f113789394544263313243c9e8a88b8ffd318428e456643f9d6e4e57fd49ac8ff99d419fb5256dac23c06b039b7f5cabf116cc6c5eb40@54.73.71.70:15020"
+      - "enode://342c9b1738bc1ddd3d37751a9c0c3d18f64dffb5449a036a18c56ca582ee5da275607081bb62f3817b5d142d0baf197853a938bc309c73d37c0784e3f1e5d1c8@54.73.71.70:15030"
+      - "enode://484587737be3d771d1163761dfd1e10b4128e52620192ab185872f9d8aa09237c60e5c8e2b7f527f932e1a05917e27cc9d1e039a72dd4cdcaada8ad2d5d63005@54.73.71.70:15040"
+
+    metadata:
+      namespace: warehousesg-bes
+      labels:
+
+    liveliness_check:
+      enabled: false
+
+    proxy:
+      provider: ambassador
+      external_url: warehousesg.besu.devh3.aws.blockchaincloudpoc-develop.com
+      p2p: 15040
+      rpc: 15041
+      tmport: 15043
+
+    images:
+      node: hyperledger/besu:1.5.3
+      alpineutils: hyperledgerlabs/alpine-utils:1.0
+      orion: pegasyseng/orion:1.5.2
+
+    node:
+      name: warehousesg
+      consensus: ibft
+      subject: O=Warehouse,OU=Warehouse,L=Boston,C=US
+      mountPath: /etc/genesis
+      servicetype: ClusterIP
+      imagePullSecret: regcred
+      ports:
+        p2p: 30303
+        rpc: 8545
+        ws: 8546
+
+    orion:
+      name: orion
+      tls: True
+      confdir: /etc/config
+      url: "https://warehousesg.besu.devh3.aws.blockchaincloudpoc-develop.com"
+      nodelist: "\"https://carriersg.besu.devh3.aws.blockchaincloudpoc-develop.com:15013\",\"https://manufacturersg.besu.devh3.aws.blockchaincloudpoc-develop.com:15023\",\"https://storesg.besu.devh3.aws.blockchaincloudpoc-develop.com:15033\""
+      trust: ca-or-tofu
+      ports:
+        nodeport: 8888
+        clientport: 8080
+
+    storage:
+      storageclassname: awsstorageclass
+      storagesize: 1Gi
+
+    vault:
+      address: http://ab0e697583dfc447b8d14e6526e14759-1481581572.eu-west-1.elb.amazonaws.com:20002
+      secretprefix: secret/warehousesg-bes/crypto/warehousesg
+      serviceaccountname: vault-auth
+      keyname: data
+      oriondir: orion
+      tlsdir: tls
+      role: vault-role
+      authpath: besuwarehousesg
+
+    genesis: ewogICJjb25maWciOiB7CiAgICAiY2hhaW5JZCI6IDIwMTgsCiAgICAiY29uc3RhbnRpbm9wbGVmaXhibG9jayI6IDAsCiAgICAiY29udHJhY3RTaXplTGltaXQiOiAyMTQ3NDgzNjQ3LAogICAgImliZnQyIjogewogICAgICAiYmxvY2twZXJpb2RzZWNvbmRzIjogMiwKICAgICAgImVwb2NobGVuZ3RoIjogMzAwMDAsCiAgICAgICJyZXF1ZXN0dGltZW91dHNlY29uZHMiOiAxMAogICAgfQogIH0sCiAgIm5vbmNlIjogIjB4MCIsCiAgInRpbWVzdGFtcCI6ICIweDU4ZWU0MGJhIiwKICAiZ2FzTGltaXQiOiAiMHgxZmZmZmZmZmZmZmZmZiIsCiAgImRpZmZpY3VsdHkiOiAiMHgxIiwKICAiZXh0cmFEYXRhIjogIjB4Zjg3ZWEwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMGY4NTQ5NGYzZTMwMTI3Y2ZkNjI5ODQ5YjNiYmEwMmJjNzY3NDE1ZjdlMmE5NWY5NGVhN2E4OGI3M2M3YjYzZGUwZmJhMjQ5MmZjZDZmMzMxNzE5MDY1Nzc5NDc0ZGY5NzI5ZjhmNTg2ZTkzOTllMDZiMzJkMzJlNThlMzgwOTE2MjE5NDk0YjBlM2EwOWNhNzM0Y2JhOTdjZGFkZjlmNjg1MmEyYjNiYWJkNGE4MDg0MDAwMDAwMDBjMCIKfQ==
