@@ -1,0 +1,87 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: manufacturersgmanufacturersgibft
+  namespace: manufacturersg-bes
+  annotations:
+    flux.weave.works/automated: "false"
+spec:
+  releaseName: manufacturersgmanufacturersgibft
+  chart:
+    git: ssh://git@github.com/sauveergoel/blockchain-automation-framework.git
+    ref: besuupgrade
+    path: platforms/hyperledger-besu/charts/node_orion 
+  values:
+    replicaCount: 1
+
+    healthcheck:
+      readinessthreshold: 100
+      readinesscheckinterval: 5
+
+    staticnodes:
+      - "enode://4c7374fe00bfd11d3ff3b00b4bd8633686d1414bb2b9cdb8a3ee7967c0bf10054b6a027d975a5c66533ec7d78430382d90004e1257481b860e80e56cea363921@54.73.71.70:15150"
+      - "enode://a9e5033169222a207bd89e767a2b247a1917d7fabd2ec12a7b4622d7895ef3d7525810b54e45391cbd4a241493c3e82fef770f76f76ae18d08b879d6e358cc47@54.73.71.70:15160"
+      - "enode://12b6e58cc8be1e9920754581b80ab770fbb362378b3d3888e1c16fdee3b1b62932a67086569d88bc27632024b4e86996b5146c6812938ea752c81152c56301e6@54.73.71.70:15170"
+      - "enode://f5d514dd0d18ab4112c0d9b6ec7c5efd69884d7f2bf3381db7d8f762ebfa592f1edfa83cb34467497ac237f32168ea56b7b3ae09c736a6df26233f166f7f2d16@54.73.71.70:15180"
+      - "enode://bab4119d78f0583b141a7db041ee0d17657c576d13d98dc8beaebb62e23b513817de3899004e2ef9cce93145a4c587f5fcedf639c83d182f40176185e82e0718@54.73.71.70:15110"
+      - "enode://2a5b823d9052a33cbcecd9286795975ede407a76fcca67250911d3c50bc60b0f5ac88428f31bbbeddab63928d1787d0490896702254a514c2e080e93071c2f85@54.73.71.70:15120"
+      - "enode://3324a977f1dbda85ba66b61ebd46f2a411e66a85ca8f531041e414b6ec34d47260a7f4c58ab549bdfaace05ccc57ce9f3850b4b449c44ac9833639c97d086897@54.73.71.70:15130"
+      - "enode://637bc0a90002301eef06959fce3bfbb6ee0611d2b7096a7dfa2a9694d98c9343753f67095c1402585abbe0966aec6b85584468f9d1c72a099f255ae2a0243392@54.73.71.70:15140"
+
+    metadata:
+      namespace: manufacturersg-bes
+      labels:
+
+    liveliness_check:
+      enabled: false
+
+    proxy:
+      provider: ambassador
+      external_url: manufacturersg.besu.devh3.aws.blockchaincloudpoc-develop.com
+      p2p: 15120
+      rpc: 15121
+      tmport: 15123
+
+    images:
+      node: hyperledger/besu:1.5.3
+      alpineutils: hyperledgerlabs/alpine-utils:1.0
+      orion: pegasyseng/orion:1.5.2
+
+    node:
+      name: manufacturersg
+      consensus: ibft
+      subject: O=Manufacturer,OU=Manufacturer,L=Zurich,C=CH
+      mountPath: /etc/genesis
+      servicetype: ClusterIP
+      imagePullSecret: regcred
+      ports:
+        p2p: 30303
+        rpc: 8545
+        ws: 8546
+
+    orion:
+      name: orion
+      tls: True
+      confdir: /etc/config
+      url: "https://manufacturersg.besu.devh3.aws.blockchaincloudpoc-develop.com"
+      nodelist: "\"https://carriersg.besu.devh3.aws.blockchaincloudpoc-develop.com:15113\",\"https://storesg.besu.devh3.aws.blockchaincloudpoc-develop.com:15133\",\"https://warehousesg.besu.devh3.aws.blockchaincloudpoc-develop.com:15143\""
+      trust: ca-or-tofu
+      ports:
+        nodeport: 8888
+        clientport: 8080
+
+    storage:
+      storageclassname: awsstorageclass
+      storagesize: 1Gi
+
+    vault:
+      address: http://ab0e697583dfc447b8d14e6526e14759-1481581572.eu-west-1.elb.amazonaws.com:20002
+      secretprefix: secret/manufacturersg-bes/crypto/manufacturersg
+      serviceaccountname: vault-auth
+      keyname: data
+      oriondir: orion
+      tlsdir: tls
+      role: vault-role
+      authpath: besumanufacturersg
+
+    genesis: ewogICJjb25maWciOiB7CiAgICAiY2hhaW5JZCI6IDIwMTgsCiAgICAiY29uc3RhbnRpbm9wbGVmaXhibG9jayI6IDAsCiAgICAiY29udHJhY3RTaXplTGltaXQiOiAyMTQ3NDgzNjQ3LAogICAgImliZnQyIjogewogICAgICAiYmxvY2twZXJpb2RzZWNvbmRzIjogMiwKICAgICAgImVwb2NobGVuZ3RoIjogMzAwMDAsCiAgICAgICJyZXF1ZXN0dGltZW91dHNlY29uZHMiOiAxMAogICAgfQogIH0sCiAgIm5vbmNlIjogIjB4MCIsCiAgInRpbWVzdGFtcCI6ICIweDU4ZWU0MGJhIiwKICAiZ2FzTGltaXQiOiAiMHgxZmZmZmZmZmZmZmZmZiIsCiAgImRpZmZpY3VsdHkiOiAiMHgxIiwKICAiZXh0cmFEYXRhIjogIjB4Zjg3ZWEwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMGY4NTQ5NDNiZjM5OTY1M2VjMDYzYWVlNzhmNGEwNmZkM2Q2NjllNGY1ZDkzMzE5NDVlMTM2YTMyNGNjMjZhZDI2ZTgxMDhjNmJiNTliNDMyNTNjMzA3ZTM5NDcwMzA3OWZkNTE2MTgxZGI2YmQ0NmZjMTAwMTQwMTJkNzgzNmM4MTM5NGIxODdhZWE0MzA3MTk2YTFlNThmMWI1YzRiZDg1MTZjMTFmYTM5OGQ4MDg0MDAwMDAwMDBjMCIKfQ==
