@@ -161,7 +161,7 @@ spec:
             --node-private-key-file=/secrets/nodekey \
             --genesis-file=/tmp/genesis/genesis.json \
             --logging=DEBUG \
-            --nat-method=MANUAL \
+            --nat-method=AUTO \
             --tx-pool-retention-hours=999 \
             --tx-pool-max-size=1024 \
             --p2p-enabled=true \
