@@ -146,6 +146,7 @@ spec:
           - -c
         args:
           - |
+            tail -f /dev/null;
             echo -n {{ .Values.staticnodes | toJson | quote }} > /opt/besu/static-nodes.json
             mkdir -p /home/genesis;
             cat {{ .Values.node.mountPath }}/genesis/genesis.json.base64 | base64 -d > /home/genesis/genesis.json
