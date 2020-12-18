@@ -185,8 +185,6 @@ spec:
             containerPort: {{ .Values.node.ports.p2p }}
             protocol: TCP
         env:
-          - name: BESU_GENESIS_DIR
-            value: {{ .Values.node.mountPath }}
           - name: POD_IP
             valueFrom:
               fieldRef:
