@@ -1,0 +1,36 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: bank-bank-endorser-auth-job
+  annotations:
+    fluxcd.io/automated: "false"
+  namespace: bank-ns
+spec:
+  releaseName: bank-bank-endorser-auth-job
+  chart:
+    path: platforms/hyperledger-indy/charts/indy-auth-job
+    git: https://github.com/sauveergoel/blockchain-automation-framework.git
+    ref: indydemo
+  values:
+    metadata:
+      name: bank-bank-endorser-auth-job
+      namespace: bank-ns
+    network:
+      name: baf
+      kubernetes_url: https://34D2F36E71F0880BE63D943D2E503A9B.gr7.eu-west-1.eks.amazonaws.com
+    image:
+      name: bank
+      repository: alpine:3.9.4
+    vault:
+      address: http://vault.internal.demo.aws.blockchaincloudpoc.com:9001
+      keyPath: bank.endorsers
+      identity: bank-endorser
+      admin_auth_path: kubernetes-bank-admin-auth
+      policy: bank-bank-endorser-ro
+      policy_content: path \"/bank/endorsers/bank-endorser/*\" { capabilities = [ \"read\", \"list\" ] }
+      auth_path: kubernetes-bank-bank-endorser-auth
+    account:
+      admin_service: bank-admin-vault-auth
+      admin_role: rw
+      service: bank-bank-endorser-vault-auth
+      role: ro
