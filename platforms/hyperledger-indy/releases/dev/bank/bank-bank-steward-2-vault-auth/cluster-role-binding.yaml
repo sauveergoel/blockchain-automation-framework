@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: bank-bank-steward-2-vault-auth-role-binding
+  namespace: bank-ns
+  labels:
+    organization: bank
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+- kind: ServiceAccount
+  name: bank-bank-steward-2-vault-auth
+  namespace: bank-ns
